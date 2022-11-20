@@ -30,10 +30,10 @@ class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer',
 # 0.7016 accuracy after 10 epochs. 18s to train each epoch
 def triple_convolution():
     model = models.Sequential()
-    model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)))
+    model.add(layers.Conv2D(10, (3, 3), activation='relu', input_shape=(32, 32, 3)))
     model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-    model.add(layers.MaxPooling2D((2, 2)))
+    model.add(layers.Conv2D(40, (3, 3), activation='relu'))
+    model.add(layers.MaxPooling2D((2, 2)));
     model.add(layers.Conv2D(64, (3, 3), activation='relu'))
     model.add(layers.Flatten())
     model.add(layers.Dense(64, activation='relu'))
@@ -152,27 +152,28 @@ def extradense():
     model.add(layers.Dense(10))
     return model
 
-for construct in (tcwithDropout2,):
+if __name__ == "__main__":
+    for construct in (triple_convolution,):
 
 
-    model = construct()
-    model.summary()
+        model = construct()
+        model.summary()
 
-    model.compile(optimizer='adam',
-                  loss=tf.keras.losses.SparseCategoricalCrossentropy(),
-                  #from_logits = True will take in elements of R, False is probability distro, also default.
-                  metrics=['accuracy'])
+        model.compile(optimizer='adam',
+                      loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+                      #from_logits = True will take in elements of R, False is probability distro, also default.
+                      metrics=['accuracy'])
 
-    history = model.fit(train_images, train_labels, epochs=40,
-                        validation_data=(test_images, test_labels))
+        history = model.fit(train_images, train_labels, epochs=40,
+                            validation_data=(test_images, test_labels))
 
-    plt.plot(history.history['accuracy'], label='accuracy')
-    plt.plot(history.history['val_accuracy'], label = 'val_accuracy')
-    plt.xlabel('Epoch')
-    plt.ylabel('Accuracy')
-    plt.ylim([0.5, 1])
-    plt.legend(loc='lower right')
-    plt.show()
+        plt.plot(history.history['accuracy'], label='accuracy')
+        plt.plot(history.history['val_accuracy'], label = 'val_accuracy')
+        plt.xlabel('Epoch')
+        plt.ylabel('Accuracy')
+        plt.ylim([0.5, 1])
+        plt.legend(loc='lower right')
+        plt.show()
 
-    test_loss, test_acc = model.evaluate(test_images,  test_labels, verbose=2)
+        test_loss, test_acc = model.evaluate(test_images,  test_labels, verbose=2)
 

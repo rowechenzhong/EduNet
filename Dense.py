@@ -3,15 +3,16 @@ import numpy as np
 def softmax(x):
     return np.exp(x - np.max(x)) / np.exp(x - np.max(x)).sum()
 
-class Layer():
-    def __init__(self, m: int, n: int, f: str, eta: float):
+class Dense():
+    def __init__(self, m: int, n: int, f: str, eta: float, t0: float, dt: float):
         self.m = m
         self.n = n
         self.f = f
 
         self.eta = eta
 
-        self.t = 0
+        self.t = t0
+        self.dt = dt
 
         self.W = np.random.normal(0, 1/m, (m, n))
         self.W0 = np.random.normal(0, 1, (n,1) )
@@ -39,6 +40,7 @@ class Layer():
 
         self.Z+= self.W0
 
+
         if self.f == "relu":
             self.Aout = np.maximum(0, self.Z)
         elif self.f == "softmax":
@@ -54,24 +56,20 @@ class Layer():
         if self.f == "relu":
             dAdZ = np.diagflat(np.heaviside(self.Z, 0.5))
 
-
         elif self.f == "softmax":
-
             SM = self.Aout.reshape((-1, 1))
             dAdZ = np.diagflat(self.Aout) - np.dot(SM, SM.T)
 
         else: # ignore
             dAdZ = np.diagflat(np.ones((self.n,)))
 
-
         dLdZ = np.matmul(dAdZ, dLdA)
 
         dLdW = np.matmul(self.A, dLdZ.T)
 
-
         dLdW0 = dLdZ
 
-        self.t += 1
+        self.t += self.dt
 
         self.m = self.B1 * self.m + (1 - self.B1) * dLdW
         self.m0 = self.B1 * self.m0 + (1 - self.B1) * dLdW0
@@ -85,9 +83,10 @@ class Layer():
         vhat = self.v / (1 - self.B2 ** self.t)
         vhat0 = self.v0 / (1 - self.B2 ** self.t)
 
-        self.W -= (self.eta / (self.t/600 + 1) ** 2 / np.sqrt(vhat + self.eps) ) * mhat
-        self.W0 -= (self.eta / (self.t/600 + 1) **2 / np.sqrt(vhat0 + self.eps) ) * mhat0
+        self.W -= (self.eta / self.t ** 2 / np.sqrt(vhat + self.eps) ) * mhat
+        self.W0 -= (self.eta / self.t ** 2 / np.sqrt(vhat0 + self.eps) ) * mhat0
 
         dLdA = np.matmul(self.W, dLdZ)
 
         return dLdA
+
