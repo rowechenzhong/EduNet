@@ -1,128 +1,57 @@
 import numpy as np
+from scipy.signal import convolve
 
-class Convolution():
-    def __init__(self, kernel_size, image_size):
-        """
-        
-        kernel_num * kernel_size * kernel_size
-
-        :param kernel_num:
-        :param kernel_size:
-        """
-
-        self.k_size = kernel_size
-
-        self.kernel_w, self.kernel_h, self.kernel_d = kernel_size
-
-        # self.stride = stride
+from ConvolutionBase import ConvolutionBase
 
 
-        self.i_size = image_size
-
-        self.image_w, self.image_h, self.image_d = image_size
-
-        self.output_w = (self.image_w - self.kernel_w) + 1  # (self.image_w - self.f) / self.stride + 1
-        self.output_h = (self.image_h - self.kernel_h) + 1  # (self.image_h - self.f) / self.stride + 1
-        self.output_d = self.image_d + self.kernel_d - 1
-
-        self.o_size = (self.output_w, self.output_h, self.output_d)
-
-        self.kernels = np.random.randn(*self.k_size) / (self.kernel_d ** 2)
-
-        self.A = None
+class Convolution(ConvolutionBase):
+    def __init__(self, image_size: tuple = None, kernel_size: tuple = None, output_size: tuple = None,
+                 activation="relu"):
+        super().__init__(image_size, kernel_size, output_size)
+        self.activation = activation
 
 
     def propagate(self, A):
         """
 
-        :param image: h, w, [depth]
+        :param A:
         :return:
         """
 
-        Z = np.zeros(self.o_size)
-
         self.A = np.pad(A, ((0, 0), (0, 0), (self.kernel_d - 1, self.kernel_d - 1)), constant_values=0)
-        #
-        # print(f"input A {self.i_size}")
-        # print(f"Padded A {self.A.shape}")
-        # print(f"output Z {self.o_size}")
-        # print(f"kernel {(self.kernel_size, self.kernel_size, self.kernel_num)} == {self.kernels.shape}")
+        self.Z = convolve(self.A, self.kernels, mode="valid")
 
-        for i in range(self.output_w):
-            for j in range(self.output_h):
-                for k in range(self.output_d):
-                    # print(f"A[box] {self.A[i:i+self.kernel_size,j:j+self.kernel_size,k:k+self.kernel_num].shape}")
+        if self.activation == "relu":
+            self.Aout = np.maximum(self.Z, 0)
+        else:
+            self.Aout = self.Z
+        return self.Aout
 
-                    Z[i][j][k] = np.tensordot(self.A[
-                                              i:i + self.kernel_w,
-                                              j:j + self.kernel_h,
-                                              k:k + self.kernel_d
-                                              ], self.kernels, 3)
-
-        return Z
-
-    def backpropagate(self, dLdZ):
+    def backpropagate(self, dLdA):
         """
         Here, dLdA is the amount that we blame each element A in the output.
 
         Observe that " W * image = A " for some very convoluted definition of " * "
 
-        So we figure out what dLdW was by looking at the image. We update and send dLdW back.
+        So we figure out what dLdW was by looking at the image. We update and send dLdA back.
 
         :param dLdA:
-        :return:
+        :return:dLdA
         """
+        if self.activation == "relu":
+            dLdZ = dLdA * np.heaviside(self.Z, 0.5)
+        else:
+            dLdZ = dLdA
 
-        dLdW = np.zeros(self.kernels.shape)
-        #
-        # print("WHat")
-        # print(f"dLdW {dLdW.shape}")
-        # print(f"dLdZ {dLdZ.shape}")
-        #
-        # print(f"padded A {self.A.shape}")
-        #
-        # print(f"output {self.o_size}")
-        # print(f"input {self.i_size}")
-        # print(f"kernel {(self.kernel_size, self.kernel_size, self.kernel_num)}")
-
-
-        for i in range(self.output_w):
-            for j in range(self.output_h):
-                for k in range(self.output_d):
-                    dLdW += self.A[
-                            i:i + self.kernel_w,
-                            j:j + self.kernel_h,
-                            k:k + self.kernel_d
-                            ] * dLdZ[i][j][k]
-
+        dLdW = convolve(np.flip(self.A, (0, 1, 2)), dLdZ, mode='valid')
 
         self.kernels -= 0.0001 * dLdW  # TODO: self.eta
 
-        #
-        # print(f"padded A {self.A.shape}")
-        #
-        # print(f"output {self.o_size}")
-        # print(f"input {self.i_size}")
-        # print(f"kernel {(self.kernel_size, self.kernel_size, self.kernel_num)}")
-
-        dLdZPad = np.pad(dLdZ, ((self.kernel_w - 1, self.kernel_w - 1),
+        dLdApad = np.pad(dLdZ, ((self.kernel_w - 1, self.kernel_w - 1),
                                 (self.kernel_h - 1, self.kernel_h - 1),
                                 (0, 0))
                          , constant_values=0)
 
-        # print(f"dLdZPad {dLdZPad.shape}")
-
-
-        dLdA = np.zeros(self.i_size)
-
-        for i in range(self.image_w):
-            for j in range(self.image_h):
-                for k in range(self.image_d):
-                    # print(f"dLdZPad[box] {dLdZPad[i:i + self.kernel_size, j:j + self.kernel_size, k:k + self.kernel_num].shape}")
-                    dLdA[i][j][k] = np.tensordot(dLdZPad[
-                                                  i:i + self.kernel_w,
-                                                  j:j + self.kernel_h,
-                                                  k:k + self.kernel_d
-                                                  ], np.flip(self.kernels, (0, 1, 2)), 3)
+        dLdA = convolve(dLdApad, np.flip(self.kernels, (0, 1, 2)), mode="valid")
 
         return dLdA

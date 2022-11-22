@@ -1,15 +1,22 @@
 import numpy as np
 
+from Layer import Layer
+
 
 def softmax(x):
     return np.exp(x - np.max(x)) / np.exp(x - np.max(x)).sum()
 
-class Dense():
-    def __init__(self,  m: int = -1, n: int = -1, f: str = "none", eta: float = 0.01, t0: float = 1, dt: float  = 0.001):
-        self.m = m
-        self.n = n
 
-        self.f = f
+class Dense(Layer):
+    def __init__(self, o_size: int, i_size: int = -1, activation: str = "none",
+                 eta: float = 0.01, t0: float = 1, dt: float = 0.001):
+        super().__init__()
+
+        self.i_size: tuple = (i_size, 1)  # Redundant but okay
+
+        self.o_size: tuple = (o_size, 1)
+
+        self.f = activation
 
         self.eta = eta
 
@@ -20,29 +27,37 @@ class Dense():
         self.B2 = 0.999
         self.eps = 10 ** -8
 
-
         self.Z = None
         self.A = None
         self.Aout = None
 
-    def update_input(self, i_size):
-        m = None
-        if type(i_size) == int:
-            m = i_size
-        elif type(i_size) == np.ndarray:
-            m = i_size[0][0]
+        self.W = None
+        self.W0 = None
+        self.m = None
+        self.m0 = None
+        self.v = None
+        self.v0 = None
 
-        self.m = m
+        if i_size != -1:
+            self.update_input(i_size)
+
+    def __str__(self):
+        return f"Dense Layer {self.i_size[0]} -> {self.o_size[0]}, {self.f} activation"
+
+    def update_input(self, i_size):
+        if type(i_size) == int:
+            self.i_size = (i_size, 1)
+        elif type(i_size) == tuple:
+            self.i_size = i_size
 
         # m x n numpy array. Guassian init.
-        self.W = np.random.normal(0, 1 / m, (m, n))
-        self.W0 = np.random.normal(0, 1, (n, 1))
+        self.W = np.random.normal(0, 1 / self.i_size[0], (self.i_size[0], self.o_size[0]))
+        self.W0 = np.random.normal(0, 1, self.o_size)
 
         self.m = np.zeros(self.W.shape)
         self.m0 = np.zeros(self.W0.shape)
         self.v = np.zeros(self.W.shape)
         self.v0 = np.zeros(self.W0.shape)
-
 
     def propagate(self, A):
         self.A = A  # Store input for backprop

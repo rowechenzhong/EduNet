@@ -1,5 +1,9 @@
-class Flatten:
+from Layer import Layer
+
+
+class Flatten(Layer):
     def __init__(self, image_size: tuple = None):
+        super().__init__()
         self.i_size = None
         if image_size is not None:
             self.update_input(image_size)
@@ -7,11 +11,12 @@ class Flatten:
     def update_input(self, image_size):
         self.i_size = image_size
 
-        self.image_w, self.image_h, self.image_d = image_size
+        image_w, image_h, image_d = image_size
 
-        self.o_size = (self.image_w * self.image_h * self.image_d, 1)
+        self.o_size = (image_w * image_h * image_d, 1)
 
-
+    def __str__(self):
+        return f"Flatten Layer {self.i_size} -> {self.o_size[0]}"
 
     def propagate(self, A):
         # Z = np.zeros((self.image_w * self.image_h * self.image_d, 1))
