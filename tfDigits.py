@@ -4,7 +4,7 @@
 
 import tensorflow as tf
 # from tensorflow.python import keras
-from keras.datasets import mnist
+from keras.datasets import fashion_mnist
 from keras.models import Sequential
 from keras.layers import Dense, Conv2D, MaxPooling2D
 from keras.utils import to_categorical
@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 
 
 # load data
-(x_train, y_train), (x_test, y_test) = mnist.load_data()
+(x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
 
 
 #
@@ -102,7 +102,7 @@ def two_layers_model():
 	# 784 -> 784 -> 200 -> 10.
 
 	model.add(Dense(num_pixels, input_shape=(num_pixels,), kernel_initializer='normal', activation='relu'))
-	model.add(Dense(200, kernel_initializer='normal', activation='relu'))
+	# model.add(Dense(200, kernel_initializer='normal', activation='relu'))
 	model.add(Dense(num_classes, kernel_initializer='normal', activation='softmax'))
 	# Compile model
 	model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
@@ -165,7 +165,7 @@ def Convolutions():
 
 
 # build the model
-for construct in (Lots_of_layers_model,):
+for construct in (two_layers_model,):
 	model = construct()
 
 	# Fit the model

@@ -1,56 +1,62 @@
 import numpy as np
 from scipy.signal import convolve
 
-class Flatten():
-    def __init__(self, image_size):
-        self.i_size = image_size
-
-        self.image_w, self.image_h, self.image_d = image_size
-
-    def propagate(self, A):
-        return A.reshape((-1, 1))
-
-    def backpropagate(self, dLdZ):
-        return dLdZ.reshape(self.i_size)
 
 
 class Convolution():
-    def __init__(self, kernel_size, image_size):
+    def __init__(self, image_size: tuple = None, kernel_size: tuple = None, output_size: tuple = None):
         """
 
-        kernel_num * kernel_size * kernel_size
+        Creates a Convolution Layer with kernel_size (w, h, d) or output size (w,h,d).
 
-        :param kernel_num:
+        The input size can be inferred from previous layer.
+        Only supply one of kernel_size or output_size needs to be specified; the other will be inferred.
+
         :param kernel_size:
+        :param image_size:
         """
 
-        self.k_size = kernel_size
+        self.i_size = None
+        self.image_w = self.image_h = self.image_d = None
+        self.o_size = None
+        self.output_w = self.output_h = self.output_d = None
+        self.k_size = None
+        self.kernel_w = self.kernel_h = self.kernel_d = None
 
-        self.kernel_w, self.kernel_h, self.kernel_d = kernel_size
+        if kernel_size is None:
+            if output_size is None:
+                raise ValueError("Either a Kernel Size or an Output Size must be specified")
+            else:
+                self.o_size = output_size
+                self.output_w, self.output_h, self.output_d = output_size
+        else:
+            self.k_size = kernel_size
+            self.kernel_w, self.kernel_h, self.kernel_d = kernel_size
 
-        # self.stride = stride
-
-        self.i_size = image_size
-
-        self.image_w, self.image_h, self.image_d = image_size
-
-        self.output_w = (self.image_w - self.kernel_w) + 1  # (self.image_w - self.f) / self.stride + 1
-        self.output_h = (self.image_h - self.kernel_h) + 1  # (self.image_h - self.f) / self.stride + 1
-        self.output_d = self.image_d + self.kernel_d - 1
-
-        self.o_size = (self.output_w, self.output_h, self.output_d)
+        if image_size is not None:
+            self.update_input(image_size)
 
         self.kernels = np.random.randn(*self.k_size) / (self.kernel_d ** 2)
 
         self.A = None
 
-    # def patches_generator(self, image):
-    #     self.image = image
-    #
-    #     for h in range(self.output_h):
-    #         for w in range(self.output_w):
-    #             patch = image[h : (h+self.kernel_size), w : (w+ self.kernel_size)]
-    #             yield patch, h, w
+    def update_input(self, image_size):
+
+        self.i_size = image_size
+        self.image_w, self.image_h, self.image_d = image_size
+
+        if self.k_size is not None:
+            self.output_w = (self.image_w - self.kernel_w) + 1
+            self.output_h = (self.image_h - self.kernel_h) + 1
+            self.output_d = self.image_d + self.kernel_d - 1
+
+            self.o_size = (self.output_w, self.output_h, self.output_d)
+        else: #self.o_size is guaranteed to be not None.
+            self.kernel_w = (self.image_w + self.output_w) - 1
+            self.kernel_h = (self.image_h + self.output_h) - 1
+            self.kernel_d = (self.image_d - self.output_d) + 1
+
+            self.k_size = (self.output_w, self.output_h, self.output_d)
 
     def propagate(self, A):
         """
@@ -58,8 +64,6 @@ class Convolution():
         :param image: h, w, [depth]
         :return:
         """
-
-        Z = np.zeros(self.o_size)
 
         self.A = np.pad(A, ((0, 0), (0, 0), (self.kernel_d - 1, self.kernel_d - 1)), constant_values=0)
         Z = convolve(self.A, self.kernels, mode = "valid")

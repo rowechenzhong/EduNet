@@ -1,34 +1,5 @@
 import numpy as np
 
-
-class Flatten():
-    def __init__(self, image_size):
-
-        self.i_size = image_size
-
-        self.image_w, self.image_h, self.image_d = image_size
-
-    def propagate(self, A):
-        # Z = np.zeros((self.image_w * self.image_h * self.image_d, 1))
-        #
-        # for i in range(self.image_w):
-        #     for j in range(self.image_h):
-        #         for k in range(self.image_d):
-        #             Z[self.image_w * self.image_h * k + self.image_w * j + i][0] = A[i][j][k]
-        # return Z
-        return A.reshape((-1, 1))
-
-    def backpropagate(self, dLdZ):
-        # dLdA = np.zeros(self.i_size)
-        #
-        # for i in range(self.image_w):
-        #     for j in range(self.image_h):
-        #         for k in range(self.image_d):
-        #             dLdA[i][j][k] = dLdZ[self.image_w * self.image_h * k + self.image_w * j + i]
-        # return dLdA
-        return dLdZ.reshape(self.i_size)
-
-
 class Convolution():
     def __init__(self, kernel_size, image_size):
         """
@@ -60,13 +31,6 @@ class Convolution():
 
         self.A = None
 
-    # def patches_generator(self, image):
-    #     self.image = image
-    #
-    #     for h in range(self.output_h):
-    #         for w in range(self.output_w):
-    #             patch = image[h : (h+self.kernel_size), w : (w+ self.kernel_size)]
-    #             yield patch, h, w
 
     def propagate(self, A):
         """

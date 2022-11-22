@@ -2,7 +2,8 @@ import matplotlib.pyplot as plt
 
 from Model import *
 
-from Convolution import Convolution, Flatten
+from sciConvolution import Convolution
+from Flatten import Flatten
 from Dense import Dense
 
 from keras.datasets import fashion_mnist
@@ -59,8 +60,8 @@ if __name__ == "__main__":
     # y_test = to_categorical(y_test)
     # num_classes = y_test.shape[1]
 
-    Network = (Convolution((10, 10, 3), (28, 28, 1)),
-               Convolution((10, 10, 3), (19, 19, 3)),
+    Network = (Convolution((28, 28, 1), (10, 10, 3)),
+               Convolution((19, 19, 3), (10, 10, 3)),
                Flatten((10, 10, 5)),
                Dense(500, 10, "softmax", 0.01, 1, 0.001))
 
@@ -70,10 +71,6 @@ if __name__ == "__main__":
     TEST_BATCH_SIZE = 500
 
     TEST_BATCH_COUNT = TEST_SIZE // TEST_BATCH_SIZE
-
-
-
-    # hello
 
     for epoch in range(1000):
         # Train!
