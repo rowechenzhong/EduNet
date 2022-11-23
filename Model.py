@@ -4,6 +4,10 @@ import numpy as np
 
 from Layer import Layer
 
+import pickle
+
+import time
+
 
 def correct(A, y):
     """
@@ -12,7 +16,7 @@ def correct(A, y):
     :return:
     """
 
-    return A[y][0] >= 0.1
+    return A[y][0] == np.max(A)
 
 
 def get_dLdA(A, y):
@@ -37,6 +41,13 @@ class Model:
         if layers is None:
             layers = []
         self.layers = layers
+
+    def micro(self):
+        """
+        Returns short string representation for filename purposes.
+        :return:
+        """
+        return "".join(layer.micro() for layer in self.layers)
 
     def __str__(self):
         res = f"Model, Layers = {len(self.layers)}\n"
@@ -88,3 +99,8 @@ class Model:
         result = self.feed_forward(x)
         failure = loss(result, y)
         return result, failure
+
+    def save(self, filename = None):
+        if filename == None:
+            filename = "C://Users//rowec//PycharmProjects//learningML//Models//" + self.micro() + str(time.time_ns())
+        pickle.dump(self, open(filename, "wb"))

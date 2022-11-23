@@ -10,6 +10,9 @@ class Convolution(ConvolutionBase):
         super().__init__(image_size, kernel_size, output_size)
         self.activation = activation
 
+    def micro(self):
+        return f"C{self.activation[:2]}{self.o_size[0]*self.o_size[1]*self.o_size[2]}"
+
 
     def propagate(self, A):
         """

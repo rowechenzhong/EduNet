@@ -1,7 +1,7 @@
-import matplotlib.pyplot as plt
-
 from Model import *
 
+from Convolution import Convolution
+from Auxilliary import Flatten
 from Dense import Dense
 
 from keras.datasets import fashion_mnist
@@ -12,94 +12,61 @@ if __name__ == "__main__":
     (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
 
     TRAIN_SIZE = len(x_train)
-
-    print(TRAIN_SIZE)
-
     TEST_SIZE = len(x_test)
 
-    print(TEST_SIZE)
-
-    # plot 4 images as gray scale
-    plt.subplot(241)
-    plt.imshow(x_train[0], cmap=plt.get_cmap('gray'))
-    plt.subplot(242)
-    plt.imshow(x_train[1], cmap=plt.get_cmap('gray'))
-    plt.subplot(243)
-    plt.imshow(x_train[2], cmap=plt.get_cmap('gray'))
-    plt.subplot(244)
-    plt.imshow(x_train[3], cmap=plt.get_cmap('gray'))
-
-    plt.subplot(245)
-    plt.imshow(x_train[4], cmap=plt.get_cmap('gray'))
-    plt.subplot(246)
-    plt.imshow(x_train[5], cmap=plt.get_cmap('gray'))
-    plt.subplot(247)
-    plt.imshow(x_train[6], cmap=plt.get_cmap('gray'))
-    plt.subplot(248)
-    plt.imshow(x_train[7], cmap=plt.get_cmap('gray'))
-
-    # show the plot
-    plt.show()
+    print(f"Training Dataset {TRAIN_SIZE}")
+    print(f"Testing Dataset {TEST_SIZE}")
 
     # normalize inputs from 0-255 to 0-1
     x_train = x_train / 255
     x_test = x_test / 255
 
-    # flatten 28*28 images to a 784 vector for each image
-    num_pixels = x_train.shape[1] * x_train.shape[2]
-    x_train1d = x_train.reshape((x_train.shape[0], num_pixels)).astype('float32')
-    x_test1d = x_test.reshape((x_test.shape[0], num_pixels)).astype('float32')
-    # # one hot encode outputs
-    # y_train = to_categorical(y_train)
-    # y_test = to_categorical(y_test)
-    # num_classes = y_test.shape[1]
+    x_train3d = x_train.reshape((x_train.shape[0], 784, 1)).astype('float32')
+    x_test3d = x_test.reshape((x_test.shape[0], 784, 1)).astype('float32')
 
-    Network = (Dense(784, 784, "relu", 0.01, 1, 0.001), Dense(784, 10, "softmax", 0.01, 1, 0.001))
+    Network = Model()
+    Network.join(Dense(i_size=784, o_size=700, activation="sigmoid", eta = 0.001))
+    Network.join(Dense(o_size=300, activation="sigmmoid", eta = 0.001))
+    Network.join(Dense(o_size=10, activation="softmax", eta = 0.001))
 
-    BATCH_COUNT = 100
-    BATCH_SIZE = TRAIN_SIZE // BATCH_COUNT
-    # hello
+    Network.compile()
 
-    for epoch in range(1000):
-        # Train!
+    print(Network)
+    print(Network.micro())
 
-        which_batch = epoch % BATCH_COUNT
+    BATCH_SIZE = TRAIN_SIZE // 20
+    BATCH_COUNT = TRAIN_SIZE // BATCH_SIZE
 
+    TEST_BATCH_SIZE = TEST_SIZE
+
+    TEST_BATCH_COUNT = TEST_SIZE // TEST_BATCH_SIZE
+
+    for epoch in range(BATCH_COUNT):
         cumulative_loss = 0
         cumulative_correct = 0
 
-        for i in range(which_batch * BATCH_SIZE, (which_batch + 1) * BATCH_SIZE):
-            x = x_train1d[i]
+        for i in range(epoch * BATCH_SIZE, (epoch + 1) * BATCH_SIZE):
+            x = x_train3d[i]
             y = y_train[i]
-            result = feed_forward(Network, x.reshape(784, 1))
-            failure = loss(result, y)
-            dLdA = get_dLdA(result, y)
-            back_forward(Network, dLdA)
+            result, failure = Network.cycle(x, y)
             cumulative_loss += failure
 
             cumulative_correct += correct(result, y)
-
-        # for i in range(3):
-        #     random_test = random.randint(0, TRAIN_SIZE - 1)
-        #     x = x_train1d[random_test]
-        #     y = y_train[random_test]
-        #     result = feed_forward(Network, x.reshape(784, 1))
-        #     print(result)
-
         print(
             f"Epoch = {epoch} ({BATCH_SIZE} per batch) Average Loss = {cumulative_loss / BATCH_SIZE}, Accuracy = {cumulative_correct / BATCH_SIZE}")
 
         cumulative_loss = 0
         cumulative_correct = 0
 
-        for i in range(TEST_SIZE):
-            x = x_test1d[i]
+        which_test_batch = epoch % TEST_BATCH_COUNT
+
+        for i in range(which_test_batch * TEST_BATCH_SIZE, (which_test_batch + 1) * TEST_BATCH_SIZE):
+            x = x_test3d[i]
             y = y_test[i]
-            result = feed_forward(Network, x.reshape(784, 1))
-            failure = loss(result, y)
-            dLdA = get_dLdA(result, y)
+            result, failure = Network.test(x, y)
             cumulative_loss += failure
             cumulative_correct += correct(result, y)
 
-        print(f"Testing --- Average Loss = {cumulative_loss / TEST_SIZE}, Accuracy = {cumulative_correct / TEST_SIZE}")
-
+        print(
+            f"Testing ({TEST_BATCH_SIZE} per test) --- Average Loss = {cumulative_loss / TEST_BATCH_SIZE}, Accuracy = {cumulative_correct / TEST_BATCH_SIZE}")
+    Network.save()

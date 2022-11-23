@@ -1,7 +1,7 @@
 from Model import *
 
 from Convolution import Convolution
-from Flatten import Flatten
+from Auxilliary import Flatten
 from Dense import Dense
 
 from keras.datasets import fashion_mnist
@@ -34,22 +34,18 @@ if __name__ == "__main__":
 
     print(Network)
 
-    BATCH_SIZE = 5000
+    BATCH_SIZE = 500
     BATCH_COUNT = TRAIN_SIZE // BATCH_SIZE
 
-    TEST_BATCH_SIZE = TEST_SIZE
+    TEST_BATCH_SIZE = TEST_SIZE // 100
 
     TEST_BATCH_COUNT = TEST_SIZE // TEST_BATCH_SIZE
 
-    for epoch in range(1000):
-        # Train!
-
-        which_batch = epoch % BATCH_COUNT
-
+    for epoch in range(BATCH_COUNT):
         cumulative_loss = 0
         cumulative_correct = 0
 
-        for i in range(which_batch * BATCH_SIZE, (which_batch + 1) * BATCH_SIZE):
+        for i in range(epoch * BATCH_SIZE, (epoch + 1) * BATCH_SIZE):
             x = x_train3d[i]
             y = y_train[i]
             result, failure = Network.cycle(x, y)

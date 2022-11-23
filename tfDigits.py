@@ -165,11 +165,11 @@ def Convolutions():
 
 
 # build the model
-for construct in (two_layers_model,):
+for construct in (baseline_model,):
 	model = construct()
 
 	# Fit the model
-	model.fit(x_train1d, y_train, validation_data=(x_test1d, y_test), epochs=50, batch_size=200, verbose=2)
+	model.fit(x_train1d, y_train, validation_data=(x_test1d, y_test), epochs=50, batch_size=1000, verbose=2)
 	# Final evaluation of the model
 	# scores = model.evaluate(X_test, y_test, verbose=0)
 	# print("Baseline Error: %.2f%%" % (100-scores[1]*100))

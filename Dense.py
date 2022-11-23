@@ -2,6 +2,7 @@ import numpy as np
 
 from Layer import Layer
 
+from scipy.special import expit
 
 def softmax(x):
     return np.exp(x - np.max(x)) / np.exp(x - np.max(x)).sum()
@@ -9,7 +10,7 @@ def softmax(x):
 
 class Dense(Layer):
     def __init__(self, o_size: int, i_size: int = -1, activation: str = "none",
-                 eta: float = 0.01, t0: float = 1, dt: float = 0.001):
+                 eta: float = 0.01, t0: float = 1, dt: float = 0.0001):
         super().__init__()
 
         self.i_size: tuple = (i_size, 1)  # Redundant but okay
@@ -44,6 +45,9 @@ class Dense(Layer):
     def __str__(self):
         return f"Dense Layer {self.i_size[0]} -> {self.o_size[0]}, {self.f} activation"
 
+    def micro(self):
+        return f"D{self.f[:2]}{self.o_size[0]}"
+
     def update_input(self, i_size):
         if type(i_size) == int:
             self.i_size = (i_size, 1)
@@ -70,6 +74,8 @@ class Dense(Layer):
             self.Aout = np.maximum(0, self.Z)
         elif self.f == "softmax":
             self.Aout = softmax(self.Z)
+        elif self.f == "sigmoid":
+            self.Aout = expit(self.Z)
         elif self.f == "none":
             self.Aout = self.Z
         else:
@@ -79,18 +85,23 @@ class Dense(Layer):
 
     def backpropagate(self, dLdA):
 
-        if self.f == "relu":
-            dAdZ = np.diagflat(np.heaviside(self.Z, 0.5))
+        #TODO: Change the relevant things to pointwise multiplication.
 
+        dLdZ = dLdA
+
+        if self.f == "relu":
+            dLdZ = np.heaviside(self.Z, 0.5) * dLdA
         elif self.f == "softmax":
             SM = self.Aout.reshape((-1, 1))
             dAdZ = np.diagflat(self.Aout) - np.dot(SM, SM.T)
+            dLdZ = np.matmul(dAdZ, dLdA)
+        elif self.f == "sigmoid":
+            dLdZ = (self.Aout * (1 - self.Aout)) * dLdA
         elif self.f == "none":
-            dAdZ = np.diagflat(np.ones((self.n,)))
+            pass
         else:  # ignore
-            dAdZ = np.diagflat(np.ones((self.n,)))
+            pass
 
-        dLdZ = np.matmul(dAdZ, dLdA)
 
         dLdW = np.matmul(self.A, dLdZ.T)
 
