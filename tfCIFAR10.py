@@ -11,21 +11,21 @@ train_images, test_images = train_images / 255.0, test_images / 255.0
 class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer',
                'dog', 'frog', 'horse', 'ship', 'truck']
 
-#
-# plt.figure(figsize=(10,10))
-#
-# show_start = 50
-#
-# for i in range(25):
-#     plt.subplot(5,5,i+1)
-#     plt.xticks([])
-#     plt.yticks([])
-#     plt.grid(False)
-#     plt.imshow(train_images[i+show_start])
-#     # The CIFAR labels happen to be arrays,
-#     # which is why you need the extra index
-#     plt.xlabel(class_names[train_labels[i+show_start][0]])
-# plt.show()
+
+plt.figure(figsize=(10,10))
+
+show_start = 50
+
+for i in range(25):
+    plt.subplot(5,5,i+1)
+    plt.xticks([])
+    plt.yticks([])
+    plt.grid(False)
+    plt.imshow(train_images[i+show_start])
+    # The CIFAR labels happen to be arrays,
+    # which is why you need the extra index
+    plt.xlabel(class_names[train_labels[i+show_start][0]])
+plt.show()
 
 # 0.7016 accuracy after 10 epochs. 18s to train each epoch
 def triple_convolution():
@@ -154,8 +154,6 @@ def extradense():
 
 if __name__ == "__main__":
     for construct in (triple_convolution,):
-
-
         model = construct()
         model.summary()
 

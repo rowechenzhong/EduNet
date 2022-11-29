@@ -8,27 +8,36 @@ import pickle
 
 import time
 
+"""How about for outputs in R."""
+def sqloss(A, y):
+    return (A - y)**2 #That was simple enough.
 
-def correct(A, y):
+def sqdLdA(A, y):
+    return 2 * (A - y) # Lmao. Okay.
+
+
+"""These functions are valid for categorical crossentropy"""
+
+def CCEcorrect(A, y):
     """
-    :param A: what we actually predicted, i.e. (0.8, 0.1, 0.1, 0,0,00,0,0)
-    :param y: what we wanted
+    :param A: what we actually predicted, e.g. a vector of 10 things for mnist.
+    :param y: what we wanted, e.g. 2 or 4.
     :return:
     """
 
     return A[y][0] == np.max(A)
 
 
-def get_dLdA(A, y):
+def CCEdLdA(A, y):
     dLdA = np.zeros((10,), )
     dLdA[y] = -1 / A[y][0]
     dLdA = dLdA.reshape((10, 1))
     return dLdA
 
 
-def loss(A, y):
+def CCEloss(A, y):
     """
-    :param A: what we actually predicted, i.e. (0.8, 0.1, 0.1, 0,0,00,0,0)
+    :param A: what we actually predicted
     :param y: what we wanted
     :return:
     """
@@ -37,10 +46,13 @@ def loss(A, y):
 
 
 class Model:
-    def __init__(self, layers: list[Layer] = None):
+    def __init__(self, loss, dLdA, layers: list[Layer] = None):
         if layers is None:
             layers = []
         self.layers = layers
+
+        self.loss = loss
+        self.dLdA = dLdA
 
     def micro(self):
         """
@@ -71,6 +83,10 @@ class Model:
             A = layer.propagate(A)
         return A
 
+    def feed_backward(self, result, y):
+        dLdA = self.dLdA(result, y)
+        self.back_forward(dLdA)
+
     def back_forward(self, dLdA):
         for layer in self.layers[::-1]:
             dLdA = layer.backpropagate(dLdA)
@@ -83,24 +99,26 @@ class Model:
         :return: result, loss
         """
         result = self.feed_forward(x)
-        failure = loss(result, y)
-        dLdA = get_dLdA(result, y)
+        failure = self.loss(result, y)
+        dLdA = self.dLdA(result, y)
         self.back_forward(dLdA)
 
         return result, failure
+
+
 
     def test(self, x, y):
         """
         Feed forward
         :param x:
-        :return: result, loss
+        :return: result, failure (loss)
         """
 
         result = self.feed_forward(x)
-        failure = loss(result, y)
+        failure = self.loss(result, y)
         return result, failure
 
     def save(self, filename = None):
         if filename == None:
-            filename = "C://Users//rowec//PycharmProjects//learningML//Models//" + self.micro() + str(time.time_ns())
+            filename = "C://Users//rowec//PycharmProjects//learningML//Models//" + self.micro() + "-" + str(time.time_ns())
         pickle.dump(self, open(filename, "wb"))

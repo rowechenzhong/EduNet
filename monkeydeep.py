@@ -1,29 +1,45 @@
+"""
+
+This is Q-learning with a replay buffer
+
+It is. Garbage.
+
+"""
+
 import gymnasium as gym
 import numpy as np
 
-from Model import Model
+from Model import *
 from Dense import Dense
-
 
 env = gym.make('CartPole-v1')
 
 state_space = 4
 action_space = 2
 
+
 # def Discrete(state, bins):
 #     return tuple(np.digitize(s, b) - 1 for s, b in zip(state, bins))
 
 
-def Qlearning(episodes = 5000,
-              gamma = 0.95, alpha = 1, dt = 100, eps = 0.2):
-
-    Q = Model()
-    Q.join(Dense(i_size= 5, o_size = 100, activation = "sigmoid"))
-    Q.join(Dense(o_size = 100, activation="sigmoid"))
-    Q.join(Dense(o_size = 1))
+def Qlearning(episodes=5000000,
+              gamma=0.9, alpha=0.005, dt=100, eps=0.2):
+    # THIS ALPHA VALUE IS USEFUL. SETTING ALPHA = 1 IS NOT GOOD.
+    Q = Model(sqloss, sqdLdA)
+    Q.join(Dense(i_size=5, o_size=20, activation="sigmoid"))
+    Q.join(Dense(o_size=20, activation="sigmoid"))
+    Q.join(Dense(o_size=20, activation="relu"))
+    Q.join(Dense(o_size=1))
     Q.compile()
 
-    rewards = 0
+    cumulative_reward = 0
+
+    window_size = 100
+    window_x = np.zeros((window_size, 5, 1))
+    window_index = 0
+
+    window_y = np.zeros((window_size, 1, 1))
+
     for step in range(episodes):
         S = env.reset()[0]
 
@@ -36,40 +52,48 @@ def Qlearning(episodes = 5000,
             if np.random.uniform(0, 1) < eps:
                 a = env.action_space.sample()
             else:
-                q0 = Q.feed_forward(np.ndarray(S + (0,)).reshape(-1, 1))
-                q1 = Q.feed_forward(np.ndarray(S + (1,)).reshape(-1, 1))
-                a = q1 > q0
+                q0 = Q.feed_forward(np.pad(S, (0, 1), 'constant', constant_values=0).reshape((-1, 1)))
+                q1 = Q.feed_forward(np.pad(S, (0, 1), 'constant', constant_values=1).reshape((-1, 1)))
+                a = int(q1 > q0)
 
             next, reward, done, *_ = env.step(a)
 
             if not done:
-                Sa = np.ndarray(S + (a,)).reshape(-1, 1)
-                QSa = int(Q.feed_forward(Sa))
-                next0 = np.ndarray(next + (0,)).reshape(-1, 1)
-                next1 = np.ndarray(next + (1,)).reshape(-1, 1)
-                maxQ = int(np.maximum(Q.feed_forward(next0), Q.feed_forward(next1)))
-                #This is what it was supposed to be.
-                y = (1 - alpha) * QSa + alpha * (reward + gamma * maxQ)
-            S = next
+                next0 = np.pad(next, (0, 1), 'constant', constant_values=0).reshape((-1, 1))
+                next1 = np.pad(next, (0, 1), 'constant', constant_values=1).reshape((-1, 1))
+                Sa = np.pad(S, (0, 1), 'constant', constant_values=a).reshape((-1, 1))
 
+                maxQ = np.maximum(Q.feed_forward(next0), Q.feed_forward(next1))
+
+                QSa = Q.feed_forward(Sa)
+                # This is what it was supposed to be.
+                y = (1 - alpha) * QSa + alpha * (reward + gamma * maxQ)
+
+                # Run it back
+                Q.feed_backward(QSa, y)
+
+                window_x[window_index % window_size] = Sa
+                window_y[window_index % window_size] = y
+
+                window_index += 1
+
+                for i in range(1):
+                    idx = np.random.randint(min(window_index, window_size))
+                    Q.cycle(window_x[idx], window_y[idx])
+
+            S = next
 
             score += reward
 
         else:
-            rewards += score
+            cumulative_reward += score
             if score > 195 and step >= 100:
                 print("Solved!")
 
         if step % dt == 0:
-            print(rewards / (step + 1))
+            print(cumulative_reward / dt)
+            cumulative_reward = 0
 
 
-bin_size = 30
-
-bins = [np.linspace(-4.8, 4.8, bin_size),
-           np.linspace(-4, 4, bin_size),
-           np.linspace(-0.418, 0.418, bin_size),
-           np.linspace(-4, 4, bin_size)]
-qtable = np.random.uniform(low = -1, high = 1, size = ([bin_size] * state_space + [action_space]))
-
-Qlearning(qtable, bins)
+if __name__ == "__main__":
+    Qlearning()
