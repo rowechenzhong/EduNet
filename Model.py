@@ -29,7 +29,7 @@ def CCEcorrect(A, y):
 
 
 def CCEdLdA(A, y):
-    dLdA = np.zeros((10,), )
+    dLdA = np.zeros((10,), ) #TODO: Ugh get rid of hardcoded 10.
     dLdA[y] = -1 / A[y][0]
     dLdA = dLdA.reshape((10, 1))
     return dLdA
