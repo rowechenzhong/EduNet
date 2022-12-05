@@ -54,7 +54,7 @@ class Dense(Layer):
         elif type(i_size) == tuple:
             self.i_size = i_size
 
-        # m x n numpy array. Guassian init.
+        # m x n numpy array. Gaussian init.
         self.W = np.random.normal(0, 1 / self.i_size[0], (self.i_size[0], self.o_size[0]))
         self.W0 = np.random.normal(0, 1, self.o_size)
 
@@ -84,11 +84,6 @@ class Dense(Layer):
         return self.Aout
 
     def backpropagate(self, dLdA):
-
-        #TODO: Change the relevant things to pointwise multiplication.
-
-        dLdZ = dLdA
-
         if self.f == "relu":
             dLdZ = np.heaviside(self.Z, 0.5) * dLdA
         elif self.f == "softmax":
@@ -98,9 +93,9 @@ class Dense(Layer):
         elif self.f == "sigmoid":
             dLdZ = (self.Aout * (1 - self.Aout)) * dLdA
         elif self.f == "none":
-            pass
+            dLdZ = dLdA
         else:  # ignore
-            pass
+            dLdZ = dLdA
 
 
         dLdW = np.matmul(self.A, dLdZ.T)

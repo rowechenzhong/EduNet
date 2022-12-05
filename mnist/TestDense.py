@@ -1,6 +1,6 @@
 from Model import *
 
-from Dense import Dense
+from Dense.Dense import Dense
 
 from keras.datasets import fashion_mnist
 
@@ -32,7 +32,7 @@ if __name__ == "__main__":
     print(Network)
     print(Network.micro())
 
-    BATCH_SIZE = TRAIN_SIZE // 20
+    BATCH_SIZE = TRAIN_SIZE // 200
     BATCH_COUNT = TRAIN_SIZE // BATCH_SIZE
 
     TEST_BATCH_SIZE = TEST_SIZE
