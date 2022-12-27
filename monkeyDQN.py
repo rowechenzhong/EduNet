@@ -117,7 +117,7 @@ def Qlearning(episodes=5000000,
                 # print("Dataset Preparation")
 
 
-                # for idx in range(size):
+                # for idx in range(shape):
                 #     Sa, next, reward = history_x[idx], history_sp[idx], history_r[idx]
                 #
                 #     QSa = Q.feed_forward(Sa)
@@ -143,7 +143,7 @@ def Qlearning(episodes=5000000,
                 #     _, loss = Q.test(Sa, y)
                 #     cumulative_loss += loss
 
-                # print(f"Testing --- Average Loss = {cumulative_loss / size}")
+                # print(f"Testing --- Average Loss = {cumulative_loss / shape}")
 
                 train(history_x, history_sp, history_r, alpha, gamma, Q)
 
@@ -153,7 +153,7 @@ def Qlearning(episodes=5000000,
                 #     _, loss = Q.test(Sa, y)
                 #     cumulative_loss += loss
 
-                # print(f"Testing --- Average Loss = {cumulative_loss / size}")
+                # print(f"Testing --- Average Loss = {cumulative_loss / shape}")
 
             S = next
 

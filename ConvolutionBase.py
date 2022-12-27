@@ -7,9 +7,9 @@ class ConvolutionBase(Layer):
     def __init__(self, image_size: tuple = None, kernel_size: tuple = None, output_size: tuple = None):
         """
 
-        Creates a Convolution Layer with kernel_size (w, h, d) or output size (w,h,d).
+        Creates a Convolution Layer with kernel_size (w, h, d) or output shape (w,h,d).
 
-        The input size can be inferred from previous layer.
+        The input shape can be inferred from previous layer.
         Only supply one of kernel_size or output_size needs to be specified; the other will be inferred.
 
         :param kernel_size:

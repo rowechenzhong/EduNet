@@ -2,7 +2,7 @@ from Model import *
 
 from Convolution import Convolution
 from Auxilliary import Flatten
-from Dense import Dense
+from Dense.Dense import Dense
 
 from keras.datasets import fashion_mnist
 
@@ -17,7 +17,7 @@ if __name__ == "__main__":
     print(f"Training Dataset {TRAIN_SIZE}")
     print(f"Testing Dataset {TEST_SIZE}")
 
-    # normalize inputs from 0-255 to 0-1, reshape to input size.
+    # normalize inputs from 0-255 to 0-1, reshape to input shape.
     x_train = x_train / 255
     x_test = x_test / 255
 

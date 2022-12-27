@@ -29,9 +29,8 @@ def CCEcorrect(A, y):
 
 
 def CCEdLdA(A, y):
-    dLdA = np.zeros((10,), ) #TODO: Ugh get rid of hardcoded 10.
-    dLdA[y] = -1 / A[y][0]
-    dLdA = dLdA.reshape((10, 1))
+    dLdA = np.zeros(A.shape)
+    dLdA[y][0] = -1 / A[y][0]
     return dLdA
 
 
@@ -42,7 +41,38 @@ def CCEloss(A, y):
     :return:
     """
 
-    return - math.log(A[y][0])
+    return - np.log(A[y][0])
+
+
+def CCEBatchcorrect(A, y):
+    """
+    :param A: what we actually predicted, e.g. a vector of 10 things for mnist.
+    :param y: what we wanted, e.g. 2 or 4.
+    :return:
+    """
+
+    return np.count_nonzero(np.argmax(A, axis=0) == y) # Our predictions versus given
+
+def CCEBatchdLdA(A, y):
+    dLdA = np.zeros(A.shape)
+
+    #TODO: Vectorize this?
+
+    for i in range(y.shape[0]):
+        dLdA[y[i]][i] += -1/A[y[i]][i] # Lol fine.
+    return dLdA
+
+
+def CCEBatchloss(A, y):
+    """
+    :param A: what we actually predicted
+    :param y: what we wanted
+    :return:
+    """
+
+    #... lol?
+
+    return np.sum(-np.log(A[y, np.arange(y.shape[0])]))
 
 
 class Model:

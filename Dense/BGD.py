@@ -6,7 +6,7 @@ from scipy.special import expit
 
 
 def softmax(x):
-    return np.exp(x - np.max(x)) / np.exp(x - np.max(x)).sum()
+    return np.exp(x - np.max(x)) / np.exp(x - np.max(x)).sum(axis=0)
 
 
 class Dense(Layer):
@@ -88,22 +88,31 @@ class Dense(Layer):
         if self.f == "relu":
             dLdZ = np.heaviside(self.Z, 0.5) * dLdA
         elif self.f == "softmax":
-            dLdZ = self.Aout * (dLdA - (self.Aout.T @ dLdA))
+            dLdZ = self.Aout * (dLdA - np.diagonal(self.Aout.T @ dLdA))
+            # dLdZ = self.Aout * dLdA - self.Aout @ (self.Aout.T @ dLdA)  # Change this mf.
         elif self.f == "sigmoid":
-            dLdZ = (self.Aout * (1 - self.Aout)) * dLdA
+            dLdZ = (self.Aout * (1 - self.Aout)) * dLdA # Pointwise, we're okay.
         elif self.f == "none":
             dLdZ = dLdA
         else:  # ignore
             dLdZ = dLdA
 
-        dLdW = np.matmul(self.A, dLdZ.T)
-
-        dLdW0 = dLdZ
+        dLdW = np.matmul(self.A, dLdZ.T)  # Figure out this mf too.
+        # Exactly what do I want. Currently, A is a stack of column vectors, and dLdZ is a stack of column vectors as well.
+        # If we transpose dLdZ, we get a stack of row vectors.
+        # Wait, no fucking way. Does this just work????
+        # Nice!
+        # print(dLdZ.shape)
+        dLdW0 = np.sum(dLdZ, axis = 1).reshape((-1,1))
+        # print(dLdW0.shape)
 
         self.t += self.dt
 
         self.m = self.B1 * self.m + (1 - self.B1) * dLdW
+        # print(self.m0.shape)
+
         self.m0 = self.B1 * self.m0 + (1 - self.B1) * dLdW0
+        # print(self.m0.shape)
 
         self.v = self.B2 * self.v + (1 - self.B2) * dLdW ** 2
         self.v0 = self.B2 * self.v0 + (1 - self.B2) * dLdW0 ** 2
@@ -116,7 +125,9 @@ class Dense(Layer):
 
         self.W -= (self.eta / self.t ** 2 / np.sqrt(vhat + self.eps)) * mhat
         self.W0 -= (self.eta / self.t ** 2 / np.sqrt(vhat0 + self.eps)) * mhat0
+        # print(self.W0.shape)
 
-        dLdA = np.matmul(self.W, dLdZ)
+        dLdA = np.matmul(self.W, dLdZ)  # Anddddd here. Wait, originally dLdZ was a column vector.
+        # Now, it's fleshed out in matrices. Which is like, still okay.
 
         return dLdA
