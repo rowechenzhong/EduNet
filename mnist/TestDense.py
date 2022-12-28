@@ -23,16 +23,16 @@ if __name__ == "__main__":
     x_test = x_test.reshape((x_test.shape[0], 784, 1)).astype('float32')
 
     Network = Model(CCEloss, CCEdLdA)
-    Network.join(Dense(i_size=784, o_size=700, activation="sigmoid", eta = 0.001))
-    Network.join(Dense(o_size=300, activation="sigmmoid", eta = 0.001))
-    Network.join(Dense(o_size=10, activation="softmax", eta = 0.001))
+    Network.join(Dense(i_size=784, o_size=700, activation="sigmoid"))
+    Network.join(Dense(o_size=300, activation="sigmmoid"))
+    Network.join(Dense(o_size=10, activation="softmax"))
 
     Network.compile()
 
     print(Network)
     print(Network.micro())
 
-    BATCH_SIZE = TRAIN_SIZE // 20
+    BATCH_SIZE = TRAIN_SIZE // 100
     BATCH_COUNT = TRAIN_SIZE // BATCH_SIZE
 
     TEST_BATCH_SIZE = TEST_SIZE
