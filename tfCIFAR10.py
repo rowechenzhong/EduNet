@@ -11,21 +11,22 @@ train_images, test_images = train_images / 255.0, test_images / 255.0
 class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer',
                'dog', 'frog', 'horse', 'ship', 'truck']
 
+print(train_images.shape)
 
-plt.figure(figsize=(10,10))
-
-show_start = 50
-
-for i in range(25):
-    plt.subplot(5,5,i+1)
-    plt.xticks([])
-    plt.yticks([])
-    plt.grid(False)
-    plt.imshow(train_images[i+show_start])
-    # The CIFAR labels happen to be arrays,
-    # which is why you need the extra index
-    plt.xlabel(class_names[train_labels[i+show_start][0]])
-plt.show()
+# plt.figure(figsize=(10,10))
+#
+# show_start = 50
+#
+# for i in range(25):
+#     plt.subplot(5,5,i+1)
+#     plt.xticks([])
+#     plt.yticks([])
+#     plt.grid(False)
+#     plt.imshow(train_images[i+show_start])
+#     # The CIFAR labels happen to be arrays,
+#     # which is why you need the extra index
+#     plt.xlabel(class_names[train_labels[i+show_start][0]])
+# plt.show()
 
 # 0.7016 accuracy after 10 epochs. 18s to train each epoch
 def triple_convolution():
@@ -37,6 +38,21 @@ def triple_convolution():
     model.add(layers.Conv2D(64, (3, 3), activation='relu'))
     model.add(layers.Flatten())
     model.add(layers.Dense(64, activation='relu'))
+    model.add(layers.Dense(10, activation='softmax'))
+    return model
+
+
+# Maxes out after 11 epochs.
+
+def LeNet():
+    model = models.Sequential()
+    model.add(layers.Conv2D(6, (5, 5), activation='relu', input_shape=(32, 32, 3)))
+    model.add(layers.MaxPooling2D((2, 2)))
+    model.add(layers.Conv2D(16, (5, 5), activation='relu'))
+    model.add(layers.MaxPooling2D((2, 2)))
+    model.add(layers.Conv2D(120, (5, 5), activation='relu'))
+    model.add(layers.Flatten())
+    model.add(layers.Dense(84, activation='relu'))
     model.add(layers.Dense(10, activation='softmax'))
     return model
 
@@ -153,7 +169,7 @@ def extradense():
     return model
 
 if __name__ == "__main__":
-    for construct in (triple_convolution,):
+    for construct in (LeNet,):
         model = construct()
         model.summary()
 
@@ -162,7 +178,7 @@ if __name__ == "__main__":
                       #from_logits = True will take in elements of R, False is probability distro, also default.
                       metrics=['accuracy'])
 
-        history = model.fit(train_images, train_labels, epochs=40,
+        history = model.fit(train_images, train_labels, epochs=50,
                             validation_data=(test_images, test_labels))
 
         plt.plot(history.history['accuracy'], label='accuracy')
