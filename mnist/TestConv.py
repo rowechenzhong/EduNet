@@ -1,7 +1,7 @@
 from Model import *
 
 from Convolution import Convolution
-from Auxilliary import Flatten
+from Auxilliary import Flatten, MaxPool
 from Dense import Dense
 
 from keras.datasets import fashion_mnist
@@ -24,48 +24,22 @@ if __name__ == "__main__":
     x_train = x_train.reshape((*x_train.shape, 1)).astype('float32')
     x_test = x_test.reshape((*x_test.shape, 1)).astype('float32')
 
+    # Network = Model(CCEloss, CCEdLdA)
+    # Network.join(Convolution((28, 28, 1), (10, 10, 3)))
+    # Network.join(Convolution(kernel_size=(10, 10, 3)))
+    # Network.join(Flatten())
+    # Network.join(Dense(10, activation="softmax"))
+    #
+    # Network.compile()
+
     Network = Model(CCEloss, CCEdLdA)
-    Network.join(Convolution((28, 28, 1), (10, 10, 3)))
-    Network.join(Convolution(kernel_size=(10, 10, 3)))
+    Network.join(Convolution((28, 28, 1), (4, 4, 10)))
+    Network.join(MaxPool(kernel_size=(4, 4), stride=3))
+    Network.join(Convolution(kernel_size=(3, 3, 10)))
     Network.join(Flatten())
     Network.join(Dense(10, activation="softmax"))
-
     Network.compile()
 
     print(Network)
 
-    BATCH_SIZE = 500
-    BATCH_COUNT = TRAIN_SIZE // BATCH_SIZE
-
-    TEST_BATCH_SIZE = TEST_SIZE // 100
-
-    TEST_BATCH_COUNT = TEST_SIZE // TEST_BATCH_SIZE
-
-    for epoch in range(BATCH_COUNT):
-        cumulative_loss = 0
-        cumulative_correct = 0
-
-        for i in range(epoch * BATCH_SIZE, (epoch + 1) * BATCH_SIZE):
-            x = x_train[i]
-            y = y_train[i]
-            result, failure = Network.cycle(x, y)
-            cumulative_loss += failure
-
-            cumulative_correct += CCEcorrect(result, y)
-        print(
-            f"Epoch = {epoch} ({BATCH_SIZE} per batch) Average Loss = {cumulative_loss / BATCH_SIZE}, Accuracy = {cumulative_correct / BATCH_SIZE}")
-
-        cumulative_loss = 0
-        cumulative_correct = 0
-
-        which_test_batch = epoch % TEST_BATCH_COUNT
-
-        for i in range(which_test_batch * TEST_BATCH_SIZE, (which_test_batch + 1) * TEST_BATCH_SIZE):
-            x = x_test[i]
-            y = y_test[i]
-            result, failure = Network.test(x,  y)
-            cumulative_loss += failure
-            cumulative_correct += CCEcorrect(result, y)
-
-        print(
-            f"Testing --- Average Loss = {cumulative_loss / TEST_BATCH_SIZE}, Accuracy = {cumulative_correct / TEST_BATCH_SIZE}")
+    Network.train(x_train, y_train, x_test, y_test, CCEcorrect, batch_size=5000)

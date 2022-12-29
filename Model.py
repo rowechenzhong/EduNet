@@ -8,15 +8,21 @@ import pickle
 
 import time
 
+from sys import stdout
+
 """How about for outputs in R."""
+
+
 def sqloss(A, y):
-    return (A - y)**2 #That was simple enough.
+    return (A - y) ** 2  # That was simple enough.
+
 
 def sqdLdA(A, y):
-    return 2 * (A - y) # Lmao. Okay.
+    return 2 * (A - y)  # Lmao. Okay.
 
 
 """These functions are valid for categorical crossentropy"""
+
 
 def CCEcorrect(A, y):
     """
@@ -29,7 +35,7 @@ def CCEcorrect(A, y):
 
 
 def CCEdLdA(A, y):
-    dLdA = np.zeros((10,), ) #TODO: Ugh get rid of hardcoded 10.
+    dLdA = np.zeros((10,), )  # TODO: Ugh get rid of hardcoded 10.
     dLdA[y] = -1 / A[y][0]
     dLdA = dLdA.reshape((10, 1))
     return dLdA
@@ -83,6 +89,11 @@ class Model:
             A = layer.propagate(A)
         return A
 
+    def test_forward(self, A):
+        for layer in self.layers:
+            A = layer.test(A)
+        return A
+
     def feed_backward(self, result, y):
         dLdA = self.dLdA(result, y)
         self.back_forward(dLdA)
@@ -106,19 +117,73 @@ class Model:
         return result, failure
 
 
-
     def test(self, x, y):
         """
-        Feed forward
+        Test forward
         :param x:
         :return: result, failure (loss)
         """
 
-        result = self.feed_forward(x)
+        result = self.test_forward(x)
         failure = self.loss(result, y)
         return result, failure
 
-    def save(self, filename = None):
+    def save(self, filename=None):
         if filename == None:
-            filename = "C://Users//rowec//PycharmProjects//learningML//Models//" + self.micro() + "-" + str(time.time_ns())
+            filename = "C://Users//rowec//PycharmProjects//learningML//Models//" + self.micro() + "-" + str(
+                time.time_ns())
         pickle.dump(self, open(filename, "wb"))
+
+    def train(self,
+              x_train, y_train, x_test, y_test,
+              correct,
+              batch_size = None, test_batch_size = None):
+
+        TRAIN_SIZE = x_train.shape[0]
+        TEST_SIZE = x_test.shape[0]
+        if batch_size is None:
+            batch_size = TRAIN_SIZE
+            batch_count = 1
+        else:
+            batch_count = TRAIN_SIZE // batch_size
+
+        if test_batch_size is None:
+            test_batch_size = TEST_SIZE
+            test_batch_count = 1
+        else:
+            test_batch_count = TEST_SIZE // batch_size
+
+        for epoch in range(batch_count):
+            cumulative_loss = 0
+            cumulative_correct = 0
+
+            for i in range(batch_size):
+                if(i % (batch_size // 100) == 0):
+                    stdout.write("\r" + str(100 * i / batch_size)[:5] + "%")
+                    stdout.flush()
+                x = x_train[i + epoch * batch_size]
+                y = y_train[i + epoch * batch_size]
+                result, failure = self.cycle(x, y)
+                cumulative_loss += failure
+
+                cumulative_correct += correct(result, y)
+            stdout.write("\r")
+            print(f"Epoch = {epoch} ({batch_size} per batch) Average Loss = {cumulative_loss / batch_size}, Accuracy = {cumulative_correct / batch_size}")
+
+            cumulative_loss = 0
+            cumulative_correct = 0
+
+            which_test_batch = epoch % test_batch_count
+
+            for i in range(test_batch_size):
+                if(i % (test_batch_size // 100) == 0):
+                    stdout.write("\r" + str(100 * i / test_batch_size)[:5] + "%")
+                    stdout.flush()
+                x = x_test[i + which_test_batch * test_batch_size]
+                y = y_test[i + which_test_batch * test_batch_size]
+                result, failure = self.test(x, y)
+                cumulative_loss += failure
+                cumulative_correct += correct(result, y)
+            stdout.write("\r")
+            print(
+                f"Testing --- Average Loss = {cumulative_loss / test_batch_size}, Accuracy = {cumulative_correct / test_batch_size}")
