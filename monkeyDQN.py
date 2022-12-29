@@ -7,10 +7,9 @@ It is. Garbage.
 """
 
 import gymnasium as gym
-import numpy as np
 
 from Model import *
-from Dense import Dense
+from Layers.Dense import Dense
 
 env = gym.make('CartPole-v1')
 

@@ -1,8 +1,8 @@
 from Model import *
 
-from Convolution import Convolution
-from Auxilliary import Flatten, MaxPool
-from Dense import Dense
+from Layers.Convolution import Convolution
+from Layers.Auxilliary import Flatten, MaxPool
+from Layers.Dense import Dense
 
 from keras.datasets import fashion_mnist
 

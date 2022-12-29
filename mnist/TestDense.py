@@ -1,6 +1,6 @@
 from Model import *
 
-from Dense import Dense
+from Layers.Dense import Dense
 
 from keras.datasets import fashion_mnist
 

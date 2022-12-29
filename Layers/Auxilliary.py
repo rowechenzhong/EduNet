@@ -1,7 +1,7 @@
 from Layer import Layer
 import numpy as np
 
-from Stride import expand3d
+from Util.Stride import expand3d
 
 
 class Flatten(Layer):

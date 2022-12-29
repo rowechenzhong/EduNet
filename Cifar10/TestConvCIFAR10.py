@@ -1,8 +1,8 @@
 from Model import *
 
-from Convolution import Convolution
-from Auxilliary import Flatten
-from Dense import Dense
+from Layers.Convolution import Convolution
+from Layers.Auxilliary import Flatten
+from Layers.Dense import Dense
 
 from keras.datasets import cifar10
 
