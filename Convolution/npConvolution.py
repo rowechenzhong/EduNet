@@ -4,12 +4,11 @@ from ConvolutionBase import ConvolutionBase
 
 
 class Convolution(ConvolutionBase):
-    def __init__(self, image_size: tuple = None, kernel_size: tuple = None, output_size: tuple = None):
+    def __init__(self, image_size: tuple = None, kernel_size: tuple = None, output_size: tuple = None, eta: float = 0.0001):
         super().__init__(image_size, kernel_size, output_size)
 
         self.kernels = np.random.randn(*self.k_size) / (self.kernel_d ** 2)
-
-
+        self.eta = eta
 
     def propagate(self, A):
         """
@@ -20,17 +19,12 @@ class Convolution(ConvolutionBase):
 
         Z = np.zeros(self.o_size)
 
-        self.A = np.pad(A, ((0, 0), (0, 0), (self.kernel_d - 1, self.kernel_d - 1)), constant_values=0)
-        #
-        # print(f"input A {self.i_size}")
-        # print(f"Padded A {self.A.shape}")
-        # print(f"output Z {self.o_size}")
-        # print(f"kernel {(self.kernel_size, self.kernel_size, self.kernel_num)} == {self.kernels.shape}")
+        self.A = np.pad(A, ((0, 0), (0, 0), (self.kernel_d - 1,
+                        self.kernel_d - 1)), constant_values=0)
 
         for i in range(self.output_w):
             for j in range(self.output_h):
                 for k in range(self.output_d):
-                    # print(f"A[box] {self.A[i:i+self.kernel_size,j:j+self.kernel_size,k:k+self.kernel_num].shape}")
 
                     Z[i][j][k] = np.tensordot(self.A[
                                               i:i + self.kernel_w,
@@ -64,44 +58,30 @@ class Convolution(ConvolutionBase):
         # print(f"input {self.i_size}")
         # print(f"kernel {(self.kernel_size, self.kernel_size, self.kernel_num)}")
 
-
         for i in range(self.output_w):
             for j in range(self.output_h):
                 for k in range(self.output_d):
                     dLdW += self.A[
-                            i:i + self.kernel_w,
-                            j:j + self.kernel_h,
-                            k:k + self.kernel_d
-                            ] * dLdZ[i][j][k]
+                        i:i + self.kernel_w,
+                        j:j + self.kernel_h,
+                        k:k + self.kernel_d
+                    ] * dLdZ[i][j][k]
 
-
-        self.kernels -= 0.0001 * dLdW  # TODO: self.eta
-
-        #
-        # print(f"padded A {self.A.shape}")
-        #
-        # print(f"output {self.o_size}")
-        # print(f"input {self.i_size}")
-        # print(f"kernel {(self.kernel_size, self.kernel_size, self.kernel_num)}")
+        self.kernels -= self.eta * dLdW
 
         dLdZPad = np.pad(dLdZ, ((self.kernel_w - 1, self.kernel_w - 1),
                                 (self.kernel_h - 1, self.kernel_h - 1),
-                                (0, 0))
-                         , constant_values=0)
-
-        # print(f"dLdZPad {dLdZPad.shape}")
-
+                                (0, 0)), constant_values=0)
 
         dLdA = np.zeros(self.i_size)
 
         for i in range(self.image_w):
             for j in range(self.image_h):
                 for k in range(self.image_d):
-                    # print(f"dLdZPad[box] {dLdZPad[i:i + self.kernel_size, j:j + self.kernel_size, k:k + self.kernel_num].shape}")
                     dLdA[i][j][k] = np.tensordot(dLdZPad[
-                                                  i:i + self.kernel_w,
-                                                  j:j + self.kernel_h,
-                                                  k:k + self.kernel_d
-                                                  ], np.flip(self.kernels, (0, 1, 2)), 3)
+                        i:i + self.kernel_w,
+                        j:j + self.kernel_h,
+                        k:k + self.kernel_d
+                    ], np.flip(self.kernels, (0, 1, 2)), 3)
 
         return dLdA
