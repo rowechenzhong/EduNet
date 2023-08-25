@@ -1,3 +1,4 @@
+import numpy as np
 from Model import *
 
 from Layers.Dense import Dense
