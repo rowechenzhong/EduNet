@@ -20,17 +20,17 @@ import matplotlib.pyplot as plt
 
 #
 
-# plot 4 images as gray scale
-plt.subplot(221)
-plt.imshow(x_train[0], cmap=plt.get_cmap('gray'))
-plt.subplot(222)
-plt.imshow(x_train[1], cmap=plt.get_cmap('gray'))
-plt.subplot(223)
-plt.imshow(x_train[2], cmap=plt.get_cmap('gray'))
-plt.subplot(224)
-plt.imshow(x_train[3], cmap=plt.get_cmap('gray'))
-# show the plot
-plt.show()
+# # plot 4 images as gray scale
+# plt.subplot(221)
+# plt.imshow(x_train[0], cmap=plt.get_cmap('gray'))
+# plt.subplot(222)
+# plt.imshow(x_train[1], cmap=plt.get_cmap('gray'))
+# plt.subplot(223)
+# plt.imshow(x_train[2], cmap=plt.get_cmap('gray'))
+# plt.subplot(224)
+# plt.imshow(x_train[3], cmap=plt.get_cmap('gray'))
+# # show the plot
+# plt.show()
 
 
 # normalize inputs from 0-255 to 0-1
@@ -79,89 +79,89 @@ def baseline_model():
 
 
 
-	# 0.9277 Accuracy
+# 	# 0.9277 Accuracy
 
-def zero_layers_model():
-	# create model
-	model = Sequential()
+# def zero_layers_model():
+# 	# create model
+# 	model = Sequential()
 
-	model.add(Dense(num_classes, input_shape=(num_pixels,), kernel_initializer='normal', activation='softmax'))
-	# model.add(Dense(num_classes, kernel_initializer='normal', activation='softmax'))
-	# Compile model
-	model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-	return model
-
-
-
-	# 0.9870
-
-def two_layers_model():
-	# create model
-	model = Sequential()
-
-	# 784 -> 784 -> 200 -> 10.
-
-	model.add(Dense(num_pixels, input_shape=(num_pixels,), kernel_initializer='normal', activation='relu'))
-	# model.add(Dense(200, kernel_initializer='normal', activation='relu'))
-	model.add(Dense(num_classes, kernel_initializer='normal', activation='softmax'))
-	# Compile model
-	model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-	return model
-
-
-	# 784 -> 784 -> 50 -> 50 -> 50 -> 10.
-	# 0.9852
-
-def Lots_of_layers_model():
-	# create model
-	model = Sequential()
-
-
-	model.add(Dense(num_pixels, input_shape=(num_pixels,), kernel_initializer='normal', activation='relu'))
-	model.add(Dense(50, kernel_initializer='normal', activation='relu'))
-	model.add(Dense(50, kernel_initializer='normal', activation='relu'))
-	model.add(Dense(50, kernel_initializer='normal', activation='relu'))
-	model.add(Dense(num_classes, kernel_initializer='normal', activation='softmax'))
-	# Compile model
-	model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-	return model
+# 	model.add(Dense(num_classes, input_shape=(num_pixels,), kernel_initializer='normal', activation='softmax'))
+# 	# model.add(Dense(num_classes, kernel_initializer='normal', activation='softmax'))
+# 	# Compile model
+# 	model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+# 	return model
 
 
 
+# 	# 0.9870
 
-	# 0.9863
+# def two_layers_model():
+# 	# create model
+# 	model = Sequential()
 
-def Pyramid():
-	# create model
-	model = Sequential()
+# 	# 784 -> 784 -> 200 -> 10.
 
-
-	model.add(Dense(600, input_shape=(num_pixels,), kernel_initializer='normal', activation='relu'))
-	model.add(Dense(300, kernel_initializer='normal', activation='relu'))
-	model.add(Dense(100, kernel_initializer='normal', activation='relu'))
-	model.add(Dense(50, kernel_initializer='normal', activation='relu'))
-	model.add(Dense(num_classes, kernel_initializer='normal', activation='softmax'))
-	# Compile model
-	model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-	return model
+# 	model.add(Dense(num_pixels, input_shape=(num_pixels,), kernel_initializer='normal', activation='relu'))
+# 	# model.add(Dense(200, kernel_initializer='normal', activation='relu'))
+# 	model.add(Dense(num_classes, kernel_initializer='normal', activation='softmax'))
+# 	# Compile model
+# 	model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+# 	return model
 
 
+# 	# 784 -> 784 -> 50 -> 50 -> 50 -> 10.
+# 	# 0.9852
 
-def Convolutions():
-	# create model
-	model = Sequential()
+# def Lots_of_layers_model():
+# 	# create model
+# 	model = Sequential()
 
-	model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)))
-	model.add(MaxPooling2D((2, 2)))
 
-	model.add(Dense(600, input_shape=(num_pixels,), kernel_initializer='normal', activation='relu'))
-	model.add(Dense(300, kernel_initializer='normal', activation='relu'))
-	model.add(Dense(100, kernel_initializer='normal', activation='relu'))
-	model.add(Dense(50, kernel_initializer='normal', activation='relu'))
-	model.add(Dense(num_classes, kernel_initializer='normal', activation='softmax'))
-	# Compile model
-	model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-	return model
+# 	model.add(Dense(num_pixels, input_shape=(num_pixels,), kernel_initializer='normal', activation='relu'))
+# 	model.add(Dense(50, kernel_initializer='normal', activation='relu'))
+# 	model.add(Dense(50, kernel_initializer='normal', activation='relu'))
+# 	model.add(Dense(50, kernel_initializer='normal', activation='relu'))
+# 	model.add(Dense(num_classes, kernel_initializer='normal', activation='softmax'))
+# 	# Compile model
+# 	model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+# 	return model
+
+
+
+
+# 	# 0.9863
+
+# def Pyramid():
+# 	# create model
+# 	model = Sequential()
+
+
+# 	model.add(Dense(600, input_shape=(num_pixels,), kernel_initializer='normal', activation='relu'))
+# 	model.add(Dense(300, kernel_initializer='normal', activation='relu'))
+# 	model.add(Dense(100, kernel_initializer='normal', activation='relu'))
+# 	model.add(Dense(50, kernel_initializer='normal', activation='relu'))
+# 	model.add(Dense(num_classes, kernel_initializer='normal', activation='softmax'))
+# 	# Compile model
+# 	model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+# 	return model
+
+
+
+# def Convolutions():
+# 	# create model
+# 	model = Sequential()
+
+# 	model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)))
+# 	model.add(MaxPooling2D((2, 2)))
+
+# 	model.add(Dense(600, input_shape=(num_pixels,), kernel_initializer='normal', activation='relu'))
+# 	model.add(Dense(300, kernel_initializer='normal', activation='relu'))
+# 	model.add(Dense(100, kernel_initializer='normal', activation='relu'))
+# 	model.add(Dense(50, kernel_initializer='normal', activation='relu'))
+# 	model.add(Dense(num_classes, kernel_initializer='normal', activation='softmax'))
+# 	# Compile model
+# 	model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+# 	return model
 
 
 # build the model

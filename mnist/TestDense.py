@@ -19,8 +19,8 @@ if __name__ == "__main__":
     x_train = x_train / 255
     x_test = x_test / 255
 
-    x_train = x_train.reshape((x_train.shape[0], 784, 1)).astype('float32')
-    x_test = x_test.reshape((x_test.shape[0], 784, 1)).astype('float32')
+    x_train = x_train.reshape((TRAIN_SIZE, 784, 1)).astype('float32')
+    x_test = x_test.reshape((TEST_SIZE, 784, 1)).astype('float32')
 
     Network = Model(CCEloss, CCEdLdA)
     Network.join(Dense(i_size=784, o_size=700, activation="sigmoid", eta = 0.001))
@@ -51,7 +51,8 @@ if __name__ == "__main__":
 
             cumulative_correct += CCEcorrect(result, y)
         print(
-            f"Epoch = {epoch} ({BATCH_SIZE} per batch) Average Loss = {cumulative_loss / BATCH_SIZE}, Accuracy = {cumulative_correct / BATCH_SIZE}")
+            f"Epoch = {epoch} ({BATCH_SIZE} per epoch) Average Loss = {cumulative_loss / BATCH_SIZE},"
+            f"Accuracy = {cumulative_correct / BATCH_SIZE}")
 
         cumulative_loss = 0
         cumulative_correct = 0
@@ -66,5 +67,6 @@ if __name__ == "__main__":
             cumulative_correct += CCEcorrect(result, y)
 
         print(
-            f"Testing ({TEST_BATCH_SIZE} per test) --- Average Loss = {cumulative_loss / TEST_BATCH_SIZE}, Accuracy = {cumulative_correct / TEST_BATCH_SIZE}")
+            f"Testing ({TEST_BATCH_SIZE} per test) --- Average Loss = {cumulative_loss / TEST_BATCH_SIZE},"
+            f"Accuracy = {cumulative_correct / TEST_BATCH_SIZE}")
     Network.save()

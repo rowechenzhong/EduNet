@@ -41,6 +41,8 @@ if __name__ == "__main__":
 
     TEST_BATCH_COUNT = TEST_SIZE // TEST_BATCH_SIZE
 
+    print(f"Training: {BATCH_SIZE} points per batch, {BATCH_COUNT} batches per epoch, {TRAIN_SIZE} points total.")
+    print(f"Testing: {TEST_BATCH_SIZE} per test, {TEST_SIZE} tests total.")
     for epoch in range(BATCH_COUNT):
         cumulative_loss = 0
         cumulative_correct = 0
@@ -53,7 +55,8 @@ if __name__ == "__main__":
 
             cumulative_correct += CCEcorrect(result, y)
         print(
-            f"Epoch = {epoch} ({BATCH_SIZE} per batch) Average Loss = {cumulative_loss / BATCH_SIZE}, Accuracy = {cumulative_correct / BATCH_SIZE}")
+            f"Epoch = {epoch} Average Loss = {cumulative_loss / BATCH_SIZE},"
+            f"Accuracy = {cumulative_correct / BATCH_SIZE}")
 
         cumulative_loss = 0
         cumulative_correct = 0
@@ -68,4 +71,6 @@ if __name__ == "__main__":
             cumulative_correct += CCEcorrect(result, y)
 
         print(
-            f"Testing --- Average Loss = {cumulative_loss / TEST_BATCH_SIZE}, Accuracy = {cumulative_correct / TEST_BATCH_SIZE}")
+            f"Testing --- Average Loss = {cumulative_loss / TEST_BATCH_SIZE},"
+            f" Accuracy = {cumulative_correct / TEST_BATCH_SIZE}"
+        )

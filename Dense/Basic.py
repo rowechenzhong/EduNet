@@ -45,7 +45,8 @@ class Dense(Layer):
             self.i_size = i_size
 
         # m x n numpy array. Gaussian init.
-        self.W = np.random.normal(0, 1 / self.i_size[0], (self.i_size[0], self.o_size[0]))
+        self.W = np.random.normal(
+            0, 1 / self.i_size[0], (self.i_size[0], self.o_size[0]))
         self.W0 = np.random.normal(0, 1, self.o_size)
 
     def propagate(self, A):
@@ -72,7 +73,8 @@ class Dense(Layer):
         if self.f == "relu":
             dLdZ = np.diagflat(np.heaviside(self.Z, 0.5))
         elif self.f == "softmax":
-            SM = self.Aout.reshape((-1, 1)) # Take Aout and reshape it to -1, 1
+            # Take Aout and reshape it to -1, 1
+            SM = self.Aout.reshape((-1, 1))
             dAdZ = np.diagflat(self.Aout) - np.dot(SM, SM.T)
             dLdZ = np.matmul(dAdZ, dLdA)
         elif self.f == "sigmoid":
@@ -82,7 +84,6 @@ class Dense(Layer):
         else:  # ignore
             dLdZ = dLdA
         return dLdZ
-
 
     def backpropagate(self, dLdA):
         dLdZ = self.dLdZ(dLdA)

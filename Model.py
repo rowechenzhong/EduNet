@@ -9,14 +9,18 @@ import pickle
 import time
 
 """How about for outputs in R."""
+
+
 def sqloss(A, y):
-    return (A - y)**2 #That was simple enough.
+    return (A - y) ** 2
+
 
 def sqdLdA(A, y):
-    return 2 * (A - y) # Lmao. Okay.
+    return 2 * (A - y)
 
 
 """These functions are valid for categorical crossentropy"""
+
 
 def CCEcorrect(A, y):
     """
@@ -51,15 +55,16 @@ def CCEBatchcorrect(A, y):
     :return:
     """
 
-    return np.count_nonzero(np.argmax(A, axis=0) == y) # Our predictions versus given
+    return np.count_nonzero(np.argmax(A, axis=0) == y)  # Our predictions versus given
+
 
 def CCEBatchdLdA(A, y):
     dLdA = np.zeros(A.shape)
 
-    #TODO: Vectorize this?
+    # TODO: Vectorize this?
 
     for i in range(y.shape[0]):
-        dLdA[y[i]][i] += -1/A[y[i]][i] # Lol fine.
+        dLdA[y[i]][i] += -1 / A[y[i]][i]  # Lol fine.
     return dLdA
 
 
@@ -70,7 +75,7 @@ def CCEBatchloss(A, y):
     :return:
     """
 
-    #... lol?
+    # ... lol?
 
     return np.sum(-np.log(A[y, np.arange(y.shape[0])]))
 
@@ -135,8 +140,6 @@ class Model:
 
         return result, failure
 
-
-
     def test(self, x, y):
         """
         Feed forward
@@ -148,7 +151,8 @@ class Model:
         failure = self.loss(result, y)
         return result, failure
 
-    def save(self, filename = None):
-        if filename == None:
-            filename = "C://Users//rowec//PycharmProjects//learningML//Models//" + self.micro() + "-" + str(time.time_ns())
+    def save(self, filename=None):
+        if filename is None:
+            filename = "C://Users//rowec//PycharmProjects//learningML//Models//" + self.micro() + "-" + str(
+                time.time_ns())
         pickle.dump(self, open(filename, "wb"))

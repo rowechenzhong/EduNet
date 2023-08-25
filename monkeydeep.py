@@ -10,7 +10,7 @@ import gymnasium as gym
 import numpy as np
 
 from Model import *
-from Dense import Dense
+from Dense.Dense import Dense
 
 env = gym.make('CartPole-v1')
 
