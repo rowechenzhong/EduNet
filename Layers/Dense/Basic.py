@@ -1,6 +1,6 @@
 import numpy as np
 
-from Layer import Layer
+from Core.Layer import Layer
 
 from scipy.special import expit
 
