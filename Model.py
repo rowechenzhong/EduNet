@@ -10,100 +10,16 @@ import time
 
 from sys import stdout
 
-"""How about for outputs in R."""
-
-
-def sqloss(A, y):
-<<<<<<< HEAD
-    return (A - y) ** 2
-
-
-def sqdLdA(A, y):
-    return 2 * (A - y)
-=======
-    return (A - y) ** 2  # That was simple enough.
-
-
-def sqdLdA(A, y):
-    return 2 * (A - y)  # Lmao. Okay.
->>>>>>> master
-
-
-"""These functions are valid for categorical crossentropy"""
-
-
-def CCEcorrect(A, y):
-    """
-    :param A: what we actually predicted, e.g. a vector of 10 things for mnist.
-    :param y: what we wanted, e.g. 2 or 4.
-    :return:
-    """
-
-    return A[y][0] == np.max(A)
-
-
-def CCEdLdA(A, y):
-<<<<<<< HEAD
-    dLdA = np.zeros(A.shape)
-    dLdA[y][0] = -1 / A[y][0]
-=======
-    dLdA = np.zeros((10,), )  # TODO: Ugh get rid of hardcoded 10.
-    dLdA[y] = -1 / A[y][0]
-    dLdA = dLdA.reshape((10, 1))
->>>>>>> master
-    return dLdA
-
-
-def CCEloss(A, y):
-    """
-    :param A: what we actually predicted
-    :param y: what we wanted
-    :return:
-    """
-
-    return - np.log(A[y][0])
-
-
-def CCEBatchcorrect(A, y):
-    """
-    :param A: what we actually predicted, e.g. a vector of 10 things for mnist.
-    :param y: what we wanted, e.g. 2 or 4.
-    :return:
-    """
-
-    return np.count_nonzero(np.argmax(A, axis=0) == y)  # Our predictions versus given
-
-
-def CCEBatchdLdA(A, y):
-    dLdA = np.zeros(A.shape)
-
-    # TODO: Vectorize this?
-
-    for i in range(y.shape[0]):
-        dLdA[y[i]][i] += -1 / A[y[i]][i]  # Lol fine.
-    return dLdA
-
-
-def CCEBatchloss(A, y):
-    """
-    :param A: what we actually predicted
-    :param y: what we wanted
-    :return:
-    """
-
-    # ... lol?
-
-    return np.sum(-np.log(A[y, np.arange(y.shape[0])]))
+from LossFunction import LossFunction
 
 
 class Model:
-    def __init__(self, loss, dLdA, layers: list[Layer] = None):
+    def __init__(self, loss: LossFunction, layers: list[Layer] = None):
         if layers is None:
             layers = []
         self.layers = layers
 
-        self.loss = loss
-        self.dLdA = dLdA
+        self.lossFunction = loss
 
     def micro(self):
         """
@@ -140,7 +56,7 @@ class Model:
         return A
 
     def feed_backward(self, result, y):
-        dLdA = self.dLdA(result, y)
+        dLdA = self.lossFunction.dLdA(result, y)
         self.back_forward(dLdA)
 
     def back_forward(self, dLdA):
@@ -152,44 +68,35 @@ class Model:
         """
         Feed forward then backpropagate
         :param x:
-        :return: result, loss
+        :return: result, loss, additional information from loss function
         """
         result = self.feed_forward(x)
-        failure = self.loss(result, y)
-        dLdA = self.dLdA(result, y)
+        failure = self.lossFunction.loss(result, y)
+        dLdA = self.lossFunction.dLdA(result, y)
         self.back_forward(dLdA)
 
-        return result, failure
+        return result, failure[0], failure[1:]
 
-<<<<<<< HEAD
-=======
-
->>>>>>> master
     def test(self, x, y):
         """
         Test forward
         :param x:
-        :return: result, failure (loss)
+        :return: result, failure (loss), additional information from loss function
         """
 
         result = self.test_forward(x)
-        failure = self.loss(result, y)
-        return result, failure
+        failure = self.lossFunction.loss(result, y)
+        return result, failure[0], failure[1:]
 
     def save(self, filename=None):
-<<<<<<< HEAD
         if filename is None:
-=======
-        if filename == None:
->>>>>>> master
             filename = "C://Users//rowec//PycharmProjects//learningML//Models//" + self.micro() + "-" + str(
                 time.time_ns())
         pickle.dump(self, open(filename, "wb"))
 
     def train(self,
-              x_train, y_train, x_test, y_test,
-              correct,
-              batch_size = None, test_batch_size = None):
+              x_train: np.ndarray, y_train: np.ndarray, x_test: np.ndarray, y_test: np.ndarray,
+              batch_size=None, test_batch_size=None):
 
         TRAIN_SIZE = x_train.shape[0]
         TEST_SIZE = x_test.shape[0]
@@ -210,17 +117,21 @@ class Model:
             cumulative_correct = 0
 
             for i in range(batch_size):
-                if(i % (batch_size // 100) == 0):
+                if (i % (batch_size // 100) == 0):
                     stdout.write("\r" + str(100 * i / batch_size)[:5] + "%")
                     stdout.flush()
                 x = x_train[i + epoch * batch_size]
                 y = y_train[i + epoch * batch_size]
-                result, failure = self.cycle(x, y)
+                result, failure, other_info = self.cycle(x, y)
                 cumulative_loss += failure
 
-                cumulative_correct += correct(result, y)
+                if len(other_info) > 0:
+                    cumulative_correct += other_info[1]
             stdout.write("\r")
-            print(f"Epoch = {epoch} ({batch_size} per batch) Average Loss = {cumulative_loss / batch_size}, Accuracy = {cumulative_correct / batch_size}")
+            print(
+                f"Epoch = {epoch} ({batch_size} per batch)",
+                f"Average Loss = {cumulative_loss / batch_size},",
+                f"Accuracy = {cumulative_correct / batch_size}")
 
             cumulative_loss = 0
             cumulative_correct = 0
@@ -228,14 +139,16 @@ class Model:
             which_test_batch = epoch % test_batch_count
 
             for i in range(test_batch_size):
-                if(i % (test_batch_size // 100) == 0):
-                    stdout.write("\r" + str(100 * i / test_batch_size)[:5] + "%")
+                if (i % (test_batch_size // 100) == 0):
+                    stdout.write(
+                        "\r" + str(100 * i / test_batch_size)[:5] + "%")
                     stdout.flush()
                 x = x_test[i + which_test_batch * test_batch_size]
                 y = y_test[i + which_test_batch * test_batch_size]
-                result, failure = self.test(x, y)
+                result, failure, other_info = self.test(x, y)
                 cumulative_loss += failure
-                cumulative_correct += correct(result, y)
+                if len(other_info) > 0:
+                    cumulative_correct += other_info[1]
             stdout.write("\r")
-            print(
-                f"Testing --- Average Loss = {cumulative_loss / test_batch_size}, Accuracy = {cumulative_correct / test_batch_size}")
+            print(f"Testing --- Average Loss = {cumulative_loss / test_batch_size},",
+                  f"Accuracy = {cumulative_correct / test_batch_size}")
