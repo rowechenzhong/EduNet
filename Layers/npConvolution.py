@@ -7,6 +7,9 @@ class Convolution(ConvolutionBase):
     def __init__(self, image_size: tuple = None, kernel_size: tuple = None, output_size: tuple = None):
         super().__init__(image_size, kernel_size, output_size)
 
+        self.kernels = np.random.randn(*self.k_size) / (self.kernel_d ** 2)
+
+
 
     def propagate(self, A):
         """

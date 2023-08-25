@@ -37,8 +37,6 @@ class ConvolutionBase(Layer):
         if image_size is not None:
             self.update_input(image_size)
 
-        self.kernels = np.random.randn(*self.k_size) / (self.kernel_d ** 2)
-
         self.A = None
         self.Z = None
         self.Aout = None
@@ -47,7 +45,6 @@ class ConvolutionBase(Layer):
         return f"Convolution Layer {self.i_size} -> {self.o_size}, Kernel Size {self.k_size}"
 
     def update_input(self, image_size):
-
         self.i_size = image_size
         self.image_w, self.image_h, self.image_d = image_size
 

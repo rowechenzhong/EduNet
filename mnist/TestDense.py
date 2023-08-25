@@ -1,11 +1,14 @@
 from Model import *
 
+<<<<<<< HEAD
 from Dense.Dense import Dense
+=======
+from Layers.Dense import Dense
+>>>>>>> master
 
 from keras.datasets import fashion_mnist
 
 if __name__ == "__main__":
-
     # load data
     (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
 
@@ -23,15 +26,16 @@ if __name__ == "__main__":
     x_test = x_test.reshape((TEST_SIZE, 784, 1)).astype('float32')
 
     Network = Model(CCEloss, CCEdLdA)
-    Network.join(Dense(i_size=784, o_size=700, activation="sigmoid", eta = 0.001))
-    Network.join(Dense(o_size=300, activation="sigmmoid", eta = 0.001))
-    Network.join(Dense(o_size=10, activation="softmax", eta = 0.001))
+    Network.join(Dense(i_size=784, o_size=700, activation="sigmoid"))
+    Network.join(Dense(o_size=300, activation="sigmmoid"))
+    Network.join(Dense(o_size=10, activation="softmax"))
 
     Network.compile()
 
     print(Network)
     print(Network.micro())
 
+<<<<<<< HEAD
     BATCH_SIZE = TRAIN_SIZE // 200
     BATCH_COUNT = TRAIN_SIZE // BATCH_SIZE
 
@@ -70,3 +74,7 @@ if __name__ == "__main__":
             f"Testing ({TEST_BATCH_SIZE} per test) --- Average Loss = {cumulative_loss / TEST_BATCH_SIZE},"
             f"Accuracy = {cumulative_correct / TEST_BATCH_SIZE}")
     Network.save()
+=======
+    Network.train(x_train, y_train, x_test, y_test, CCEcorrect, batch_size=TRAIN_SIZE // 100)
+    Network.save()
+>>>>>>> master

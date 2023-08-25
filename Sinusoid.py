@@ -1,6 +1,6 @@
 from Model import *
 
-from Dense import Dense
+from Layers.Dense import Dense
 
 if __name__ == "__main__":
 

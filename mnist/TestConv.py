@@ -1,8 +1,14 @@
 from Model import *
 
+<<<<<<< HEAD
 from Convolution import Convolution
 from Auxilliary import Flatten
 from Dense.Dense import Dense
+=======
+from Layers.Convolution import Convolution
+from Layers.Auxilliary import Flatten, MaxPool
+from Layers.Dense import Dense
+>>>>>>> master
 
 from keras.datasets import fashion_mnist
 
@@ -24,16 +30,25 @@ if __name__ == "__main__":
     x_train = x_train.reshape((*x_train.shape, 1)).astype('float32')
     x_test = x_test.reshape((*x_test.shape, 1)).astype('float32')
 
+    # Network = Model(CCEloss, CCEdLdA)
+    # Network.join(Convolution((28, 28, 1), (10, 10, 3)))
+    # Network.join(Convolution(kernel_size=(10, 10, 3)))
+    # Network.join(Flatten())
+    # Network.join(Dense(10, activation="softmax"))
+    #
+    # Network.compile()
+
     Network = Model(CCEloss, CCEdLdA)
-    Network.join(Convolution((28, 28, 1), (10, 10, 3)))
-    Network.join(Convolution(kernel_size=(10, 10, 3)))
+    Network.join(Convolution((28, 28, 1), (4, 4, 10)))
+    Network.join(MaxPool(kernel_size=(4, 4), stride=3))
+    Network.join(Convolution(kernel_size=(3, 3, 10)))
     Network.join(Flatten())
     Network.join(Dense(10, activation="softmax"))
-
     Network.compile()
 
     print(Network)
 
+<<<<<<< HEAD
     BATCH_SIZE = 500
     BATCH_COUNT = TRAIN_SIZE // BATCH_SIZE
 
@@ -74,3 +89,6 @@ if __name__ == "__main__":
             f"Testing --- Average Loss = {cumulative_loss / TEST_BATCH_SIZE},"
             f" Accuracy = {cumulative_correct / TEST_BATCH_SIZE}"
         )
+=======
+    Network.train(x_train, y_train, x_test, y_test, CCEcorrect, batch_size=5000)
+>>>>>>> master
