@@ -1,4 +1,4 @@
-from Layer import Layer
+from Core.Layer import Layer
 import numpy as np
 
 from Util.Stride import expand3d
@@ -72,7 +72,8 @@ class MaxPool(Layer):
         self.i_size = image_size
         self.image_w, self.image_h, self.image_d = image_size
 
-        self.output_w = (self.image_w - self.kernel_w) // self.stride + 1  # Stride may exit the thing. Fine. Smh.
+        # Stride may exit the thing. Fine. Smh.
+        self.output_w = (self.image_w - self.kernel_w) // self.stride + 1
         self.output_h = (self.image_h - self.kernel_h) // self.stride + 1
         self.output_d = self.image_d
 
@@ -83,7 +84,8 @@ class MaxPool(Layer):
         self.col_offset = np.tile(self.stride * np.arange(self.output_h).reshape((1, -1, 1)),
                                   (self.output_w, 1, self.output_d))
 
-        self.depths = np.tile(np.arange(self.output_d), (self.output_w, self.output_h, 1))
+        self.depths = np.tile(np.arange(self.output_d),
+                              (self.output_w, self.output_h, 1))
 
     def micro(self):
         return "M"
@@ -96,7 +98,8 @@ class MaxPool(Layer):
 
     def propagate(self, A):
         blow = expand3d(A, self.k_size, self.stride)
-        self.rows, self.cols = np.unravel_index(np.argmax(blow, axis=3), self.k_size)
+        self.rows, self.cols = np.unravel_index(
+            np.argmax(blow, axis=3), self.k_size)
         return np.amax(blow, axis=3)
 
     def backpropagate(self, dLdZ):

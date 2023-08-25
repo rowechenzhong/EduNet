@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class AdamArray():
     def __init__(self, shape: tuple, eta: float = 0.001):
         """
@@ -7,7 +8,7 @@ class AdamArray():
 
         Initializes with a normal distribution with SD = 1 / shape[0]
 
-        #TODO: Transpose the stupid weight matrix please
+        #TODO: Transpose the weight matrix please
 
         :param shape:
         """
